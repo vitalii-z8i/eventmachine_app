@@ -1,43 +1,27 @@
 require 'eventmachine'
+require 'em-http-server'
 
-module WorkersServer
-  def post_init
-    p "Worker connected"
-  end
+class HTTPHandler < EM::HttpServer::Server
 
-  # data = {command: 'connect', worker_id: 1}
-  def receive_data data
-    data = JSON.parse(data)
-    p "[INFO] A message from Worker, data: #{data}"
-    # TcpCommands.send(data['command'].to_sym, data)
-    send_data 'all_ok'
-  rescue => e
-    case e
-    # when ActiveRecord::RecordNotFound
-    #   p '[ERROR] Unregistered worker'
-    when JSON::ParserError
-      p '[ERROR] Wrong data format (Must be a valid JSON)'
-      p "[DEBUG] #{data} given"
-    when NoMethodError
-      p '[ERROR] Wrong command was sent'
-    else
-      p "[ERROR] Unhandled server error (#{e.class} #{e.message})"
+    def process_http_request
+      # you have all the http headers in this hash
+      puts  @http.inspect
+      puts @http_request_uri
+
+      response = EM::DelegatedHttpResponse.new(self)
+      response.status = 200
+      response.content_type 'text/html'
+      response.content = 'It works'
+      response.send_response
     end
-    send_data 'disconnected'
-    close_connection_after_writing
-  end
 
-  def unbind
-    p "Worker disconnected"
-  end
+    def http_request_errback e
+      # printing the whole exception
+      puts e.inspect
+    end
 
-  # require ::File.expand_path('lib/tcp_commands')
 end
 
-EventMachine.run {
-  EventMachine.start_server '', 8081, WorkersServer
-  EventMachine.add_periodic_timer(60) {
-    Worker.request_workers_statuses
-    p 'Workers statuses updated'
-  }
-}
+EM::run do
+    EM::start_server("0.0.0.0", 8081, HTTPHandler)
+end
