@@ -8,7 +8,6 @@ class RoutesInitializer
       delete: []
     }
     self.instance_eval &routes
-    p 'lalalalala'
     self
   end
 

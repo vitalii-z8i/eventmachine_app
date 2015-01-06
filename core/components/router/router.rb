@@ -1,12 +1,15 @@
-require File.expand_path('core/components/router/routes_initializer.rb')
 class Router
-
+  Dir["#{File.dirname(__FILE__)}/*.rb"].each {|f| require f}
   def build &routes
     @routes ||= RoutesInitializer.new &routes
     self
   end
 
-  def display
+  def builded?
+    @routes.present?
+  end
+
+  def get
     @routes.paths
   end
 
