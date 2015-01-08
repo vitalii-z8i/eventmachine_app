@@ -1,5 +1,5 @@
 module Core
-
+  COMPONENTS = ['router', 'request', 'logger']
   module ClassMethods
     attr_accessor :request, :router, :controller
 
@@ -9,8 +9,8 @@ module Core
 
     def run(params)
       self.request = Request.new(params)
-      p self.request.params
-      self.router.parse_request(self.request)
+      self.controller = self.router.parse_request(self.request)
+      p self.controller
     end
 
     def load_components
@@ -28,6 +28,7 @@ module Core
   end
 
   def self.included(receiver)
+    receiver::COMPONENTS.unshift(*self::COMPONENTS)
     receiver.extend ClassMethods
     receiver.load_components
     receiver.load_configs

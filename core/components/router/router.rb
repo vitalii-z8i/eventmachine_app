@@ -13,7 +13,17 @@ class Router
     @routes.paths
   end
 
-  def parse_request(request) # Need Request class
-
+  def parse_request(request)
+    result = {}
+    @routes.paths.send(:[], request.method.downcase.to_sym).each do |key, val|
+      p 'LALALA'
+      param_name = key.scan(/:(.*?)+?(?=\/)/)
+      p param_name
+      key = key.gsub(/:(.*?)+?(?=\/)/, "(.*)")
+      p key
+      p request.uri =~ /#{key}/
+      result = val if request.uri =~ /#{key}/
+    end
+    result
   end
 end

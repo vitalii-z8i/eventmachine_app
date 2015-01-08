@@ -1,3 +1,4 @@
 CustomApp.routes.build do
-  get '/countries', 'countries#index'
+  root 'home#index'
+  resources :countries
 end

@@ -5,29 +5,18 @@ require File.expand_path('app/custom_app.rb')
 class HTTPHandler < EM::HttpServer::Server
 
   def process_http_request
-    # puts  @http_request_method
-    # puts  @http_request_uri
-    # puts  @http_query_string
-    # puts  @http_protocol
-    # puts  @http_content
-
-    # puts  @http.inspect
-
-
     request_params = {
       method: @http_request_method,
       uri:    @http_request_uri,
       params: [@http_query_string, @http_content]
     }
 
-    p request_params
     request = CustomApp.run(request_params)
 
     respond('It works', 'text/json')
 
   rescue Exception => e
-    print("#{e.class} - #{e.message}")
-    print("\n")
+    Logger.error("#{e.class} - #{e.message}")
     e.backtrace.each do |line| 
       print(line)
       print("\n")

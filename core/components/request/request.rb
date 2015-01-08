@@ -2,26 +2,39 @@ class Request
   Dir["#{File.dirname(__FILE__)}/*.rb"].each {|f| require f}
   attr_accessor :uri, :method, :params
 
-  def initialize(request = '', path = '')
+  def initialize(request = '')
     self.method = request[:method]
-    self.uri = path
-    self.params = self.parse_params(request[:params])
+    self.uri = request[:uri] || '/'
+    self.params = parse_params(request[:params])
+    Logger.info("[REQUEST][#{self.method}] #{self.uri} \n [PARAMS] #{self.params}")
   end
 
+
+  private
   def parse_params(params)
     query_string, form_data = params
 
-    parse_query_string(query_string).concat(parse_form_data).inject(&:merge)
+    parse_query_string(query_string).merge(parse_form_data(form_data))
   end
 
-  def parse_query_string(query_string = '')
-    query_string.split('&').map do |var|
-      var = var.split('=')
-      {var[0] => var[1]}
+  def parse_query_string(query_string = nil)
+    unless query_string.nil?
+      query_string.split('&').map do |var|
+        var = var.split('=')
+        {var[0].to_sym => var[1]}
+      end.inject(&:merge)
+    else
+      {}
     end
   end
 
-  def parse_form_data(form_data = '')
-    []
+  def parse_form_data(form_data = nil)
+    unless form_data.nil?
+      keys = form_data.scan(/name=["'](.*)["']/).map(&:first).map(&:to_sym)
+      vals = form_data.scan(/(.*)\n-/).map {|str| str[0].gsub("\r", '')}
+      Hash[keys.zip(vals)]
+    else
+      {}
+    end
   end
 end

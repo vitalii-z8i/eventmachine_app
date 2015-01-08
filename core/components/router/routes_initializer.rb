@@ -2,13 +2,17 @@ class RoutesInitializer
   attr_accessor :paths
   def initialize &routes
     @paths = {
-      get:    [],
-      post:   [],
-      put:    [],
-      delete: []
+      get:    {},
+      post:   {},
+      put:    {},
+      delete: {}
     }
     self.instance_eval &routes
     self
+  end
+
+  def root(path)
+    @paths[:get]['/'] = parse_path(path)
   end
 
   def resources(name)
@@ -22,19 +26,19 @@ class RoutesInitializer
   end
 
   def get(route, path)
-    @paths[:get] << {route.to_sym => parse_path(path)}
+    @paths[:get][route] = parse_path(path)
   end
 
   def post(route, path)
-    @paths[:post] << {route.to_sym => parse_path(path)}
+    @paths[:post][route] = parse_path(path)
   end
 
   def put(route, path)
-    @paths[:put] << {route.to_sym => parse_path(path)}
+    @paths[:put][route] = parse_path(path)
   end
 
   def delete(route, path)
-    @paths[:delete] << {route.to_sym => parse_path(path)}
+    @paths[:delete][route] = parse_path(path)
   end
 
   private

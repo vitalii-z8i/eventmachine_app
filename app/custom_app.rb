@@ -1,6 +1,6 @@
 require File.expand_path('core/core.rb')
 module CustomApp
-  COMPONENTS = ['router', 'request']
+  # COMPONENTS = ['test']
   include Core
 end
 
