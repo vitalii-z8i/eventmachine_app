@@ -1,5 +1,5 @@
 module Core
-  COMPONENTS = ['router', 'request', 'logger']
+  COMPONENTS = ['router', 'request', 'logger', 'exceptions', 'controller', 'model', 'response']
   module ClassMethods
     attr_accessor :request, :router, :controller
 
@@ -7,10 +7,15 @@ module Core
       self.router ||= Router.new
     end
 
-    def run(params)
+    def process_request(params)
       self.request = Request.new(params)
-      self.controller = self.router.parse_request(self.request)
-      p self.controller
+      self.request = self.router.parse_request(self.request)
+      Logger.info("[REQUEST][#{self.request.method}] #{self.request.uri} \n [PARAMS] #{self.request.params}")
+      unless self.request.valid
+        raise RoutingError.new("[#{self.request.method}] #{self.request.uri}")
+      end
+
+      self.request.process
     end
 
     def load_components

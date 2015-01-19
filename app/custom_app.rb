@@ -3,5 +3,3 @@ module CustomApp
   # COMPONENTS = ['test']
   include Core
 end
-
-p CustomApp.routes.get

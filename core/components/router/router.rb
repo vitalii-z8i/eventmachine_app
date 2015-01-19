@@ -16,14 +16,18 @@ class Router
   def parse_request(request)
     result = {}
     @routes.paths.send(:[], request.method.downcase.to_sym).each do |key, val|
-      p 'LALALA'
-      param_name = key.scan(/:(.*?)+?(?=\/)/)
-      p param_name
-      key = key.gsub(/:(.*?)+?(?=\/)/, "(.*)")
-      p key
-      p request.uri =~ /#{key}/
-      result = val if request.uri =~ /#{key}/
+      param_names = []
+      param_values = []
+      param_names = key.scan(/:(.*?(?=\/|$))/).inject(&:concat) || []
+      key = key.gsub(/:(.*?(?=\/|$))/, "(.*)")
+      if request.uri =~ /^#{key}$/
+        result = val
+        param_values = request.uri.scan(/^#{key}$/).inject(&:concat) if param_names.any?
+        request.params.merge!(result)
+        request.params.merge!(Hash[param_names.map(&:to_sym).zip(param_values)])
+        request.valid = true
+      end
     end
-    result
+    request
   end
 end
